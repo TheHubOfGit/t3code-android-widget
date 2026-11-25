@@ -155,7 +155,7 @@ class FaviconStore internal constructor(
     private fun sha(root: String): String =
         MessageDigest.getInstance("SHA-1").digest(root.toByteArray()).joinToString("") { "%02x".format(it) }
 
-    private fun pngFile(root: String) = File(dir, "${sha(root)}.png")
+    private fun pngFile(root: String) = File(dir, "${sha(root)}-$SIZE_PX.png")
     private fun missingFile(root: String) = File(dir, "${sha(root)}.missing")
 
     companion object {
@@ -163,7 +163,7 @@ class FaviconStore internal constructor(
         private const val TTL_MS = 6L * 60 * 60 * 1000
         private const val TIMEOUT_MS = 10_000L
         private const val MAX_BYTES = 2 * 1024 * 1024
-        const val SIZE_PX = 96
+        const val SIZE_PX = 144 // 36dp at ~4x density
 
         private fun request(id: String, cwd: String): String = buildJsonObject {
             put("_tag", "Request")

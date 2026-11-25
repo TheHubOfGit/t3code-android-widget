@@ -50,6 +50,7 @@ import androidx.glance.unit.ColorProvider
 import app.t3widget.R
 import app.t3widget.data.Classifier
 import app.t3widget.data.FaviconStore
+import app.t3widget.data.NetworkBlock
 import app.t3widget.data.ProjectIcon
 import app.t3widget.data.SettingsStore
 import app.t3widget.data.ShellRepository
@@ -289,7 +290,7 @@ private fun bannerText(snapshot: WidgetSnapshot): String? = when (snapshot.statu
     SyncStatus.OK -> null
     SyncStatus.NOT_CONFIGURED -> "Not set up — tap to add your server"
     SyncStatus.LOADING -> "Loading…"
-    SyncStatus.OFFLINE -> "Offline — showing last known state"
+    SyncStatus.OFFLINE -> if (snapshot.message == NetworkBlock.MESSAGE) snapshot.message else "Offline — showing last known state"
     SyncStatus.AUTH_EXPIRED -> "Token expired — tap to paste a new one"
     SyncStatus.UPDATE_NEEDED -> snapshot.message ?: "T3 Code updated its API — widget update needed"
     SyncStatus.ERROR -> "Error: ${snapshot.message ?: "unknown"}"
@@ -380,21 +381,24 @@ private fun ProjectBadge(row: ThreadRow, style: StateStyle, favicon: Bitmap?) {
     val icon = row.icon ?: ProjectIcon("auto", Classifier.monogram(row.projectTitle), Classifier.monogramColor(row.projectTitle), "PR")
     val glyphColor = ProjectColors.glyph(icon.color)
     val showFavicon = favicon != null && icon.kind == "auto"
+    if (showFavicon) {
+        // Repo favicons are complete logos: show them edge to edge, like T3 Code does.
+        Image(
+            provider = ImageProvider(favicon!!),
+            contentDescription = style.label,
+            modifier = GlanceModifier.size(36.dp),
+        )
+        return
+    }
     Box(modifier = GlanceModifier.size(36.dp), contentAlignment = Alignment.Center) {
         Image(
             provider = ImageProvider(style.shape),
             contentDescription = style.label,
-            // A favicon sits on the theme surface, as in T3 Code; glyphs get the project color.
-            colorFilter = ColorFilter.tint(if (showFavicon) GlanceTheme.colors.surface else ProjectColors.container(icon.color)),
+            colorFilter = ColorFilter.tint(ProjectColors.container(icon.color)),
             modifier = GlanceModifier.size(36.dp),
         )
         val lucide = if (icon.kind == "lucide") LucideIcons.byName[icon.value] else null
         when {
-            showFavicon -> Image(
-                provider = ImageProvider(favicon!!),
-                contentDescription = null,
-                modifier = GlanceModifier.size(20.dp),
-            )
             lucide != null -> Image(
                 provider = ImageProvider(lucide),
                 contentDescription = null,

@@ -1,6 +1,13 @@
 package app.t3widget.settings
 
 import android.os.Bundle
+import kotlinx.coroutines.delay
+import androidx.compose.foundation.shape.RoundedCornerShape
+import android.provider.Settings
+import android.os.PowerManager
+import android.net.Uri
+import android.content.Intent
+import android.annotation.SuppressLint
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -183,6 +190,8 @@ private fun SettingsScreen(onDone: () -> Unit) {
         }
         status?.let { Text(it, style = MaterialTheme.typography.bodyMedium) }
 
+        BackgroundUpdatesCard()
+
         Spacer(Modifier.padding(4.dp))
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             TextButton(onClick = {
@@ -226,5 +235,51 @@ private fun probe(api: T3Api, base: String, token: String?): ProbeResult {
         is ApiResult.ProtocolMismatch -> ProbeResult(false, "API protocol mismatch — widget update needed.")
         is ApiResult.Offline -> ProbeResult(false, "Connection dropped: ${shell.message}")
         is ApiResult.Failed -> ProbeResult(false, "Server error: ${shell.message}")
+    }
+}
+
+/**
+ * Battery Saver (and Doze) block background network for every app not on the battery allowlist,
+ * so the widget can't refresh and reads as "offline". "Unrestricted" battery use lifts that.
+ */
+@Composable
+private fun BackgroundUpdatesCard() {
+    val context = LocalContext.current
+    val power = remember { context.getSystemService(PowerManager::class.java) }
+    var allowed by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        while (true) { // re-check after the user returns from the system dialog
+            allowed = power.isIgnoringBatteryOptimizations(context.packageName)
+            delay(1_000)
+        }
+    }
+    if (allowed) {
+        Text(
+            "Background updates: allowed, including during Battery Saver.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        return
+    }
+    Surface(
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text("Keep the widget updating", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Android cuts background apps off the network during Battery Saver, so the widget " +
+                    "stops updating and shows \"paused\". Allowing unrestricted battery use fixes that; " +
+                    "the widget still only checks every 15 minutes.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Button(onClick = {
+                @SuppressLint("BatteryLife")
+                val request = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:${context.packageName}"))
+                runCatching { context.startActivity(request) }
+                    .onFailure { context.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }
+            }) { Text("Allow background updates") }
+        }
     }
 }

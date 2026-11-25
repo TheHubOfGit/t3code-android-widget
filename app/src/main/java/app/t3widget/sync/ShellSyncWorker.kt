@@ -1,6 +1,14 @@
 package app.t3widget.sync
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Context
+import android.content.pm.ServiceInfo
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.work.ForegroundInfo
+import androidx.work.OutOfQuotaPolicy
+import app.t3widget.R
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.updateAll
 import androidx.work.Constraints
@@ -32,7 +40,28 @@ class ShellSyncWorker(context: Context, params: WorkerParameters) : CoroutineWor
         return Result.success()
     }
 
+    /** Only used below Android 12, where WorkManager runs expedited work as a foreground service. */
+    override suspend fun getForegroundInfo(): ForegroundInfo {
+        val nm = applicationContext.getSystemService(NotificationManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            nm.createNotificationChannel(NotificationChannel(CHANNEL, "Widget sync", NotificationManager.IMPORTANCE_MIN))
+        }
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL)
+            .setSmallIcon(R.drawable.ic_refresh)
+            .setContentTitle("Refreshing T3 Code widget")
+            .setPriority(NotificationCompat.PRIORITY_MIN)
+            .setSilent(true)
+            .build()
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ForegroundInfo(NOTIFICATION_ID, notification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+        } else {
+            ForegroundInfo(NOTIFICATION_ID, notification)
+        }
+    }
+
     companion object {
+        private const val CHANNEL = "sync"
+        private const val NOTIFICATION_ID = 3773
         private const val PERIODIC = "t3-shell-periodic"
         private const val ONE_SHOT = "t3-shell-refresh"
 
@@ -51,7 +80,11 @@ class ShellSyncWorker(context: Context, params: WorkerParameters) : CoroutineWor
 
         fun refreshNow(context: Context) {
             // No network constraint: if offline we want the widget to say so right away.
-            val request = OneTimeWorkRequestBuilder<ShellSyncWorker>().build()
+            // Expedited: user-initiated (widget tap / app open), and expedited jobs keep network
+            // access under Battery Saver, which otherwise blocks background apps entirely.
+            val request = OneTimeWorkRequestBuilder<ShellSyncWorker>()
+                .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+                .build()
             WorkManager.getInstance(context).enqueueUniqueWork(ONE_SHOT, ExistingWorkPolicy.REPLACE, request)
         }
 

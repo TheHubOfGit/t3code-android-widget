@@ -78,7 +78,11 @@ class ShellRepository(
                 "T3 Code updated its API (protocol ${result.serverProtocol ?: "?"}) — widget update needed",
                 now,
             )
-            is ApiResult.Offline -> fail(SyncStatus.OFFLINE, "Can't reach server", now)
+            is ApiResult.Offline -> fail(
+                SyncStatus.OFFLINE,
+                if (NetworkBlock.isBlocked(context)) NetworkBlock.MESSAGE else "Can't reach server",
+                now,
+            )
             is ApiResult.Failed -> fail(SyncStatus.ERROR, result.message, now)
         }
     }
