@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Cleartext is permitted at the platform level because the LAN/tailnet host is user-entered and
+  network-security-config cannot express IP ranges. The app enforces the real policy in
+  T3Api.validateBaseUrl: plain HTTP only to loopback, RFC1918, Tailscale (100.64/10, *.ts.net)
+  and *.local hosts; everything else must be HTTPS.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static widget-picker preview for Android 12-14 (Android 15+ uses a generated preview).
+     Keep in sync with T3StatusWidget / WidgetPreviews.sampleSnapshot. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="@drawable/pv_bg" android:orientation="vertical" android:padding="12dp">
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="40dp"
+        android:gravity="center_vertical" android:orientation="horizontal"
+        android:paddingStart="4dp" android:paddingBottom="6dp">
+        <TextView
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:text="T3 Code" android:textColor="@color/pv_on" android:textSize="16sp" android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="14:03" android:textColor="@color/pv_on_variant" android:textSize="11sp" />
+        <FrameLayout
+            android:layout_width="32dp" android:layout_height="32dp" android:layout_marginStart="8dp"
+            android:background="@drawable/pv_fab">
+            <ImageView
+                android:layout_width="18dp" android:layout_height="18dp" android:layout_gravity="center"
+                android:src="@drawable/ic_refresh" android:tint="@color/pv_on_fab" />
+        </FrameLayout>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="46dp"
+        android:background="@drawable/pv_pill_need" android:gravity="center_vertical"
+        android:orientation="horizontal" android:paddingStart="5dp" android:paddingEnd="10dp">
+        <FrameLayout android:layout_width="36dp" android:layout_height="36dp">
+            <ImageView
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:src="@drawable/shape_needs_you" android:tint="@color/pv_violet" />
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center" android:text="MA"
+                android:textSize="12sp" android:textStyle="bold"
+                android:textColor="@color/pv_violet_glyph" />
+        </FrameLayout>
+        <LinearLayout
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_marginStart="10dp" android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:text="Fix login bug" android:textColor="@color/pv_on_need"
+                android:textSize="13sp" android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:text="my-app · 1m ago" android:textColor="@color/pv_on_need"
+                android:textSize="11sp" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:background="@drawable/pv_chip_need" android:paddingStart="9dp" android:paddingTop="4dp"
+            android:paddingEnd="9dp" android:paddingBottom="4dp" android:text="Needs you"
+            android:textColor="@color/pv_need" android:textSize="11sp" android:textStyle="bold" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="46dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/pv_pill_run" android:gravity="center_vertical"
+        android:orientation="horizontal" android:paddingStart="5dp" android:paddingEnd="10dp">
+        <FrameLayout android:layout_width="36dp" android:layout_height="36dp">
+            <ImageView
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:src="@drawable/shape_running" android:tint="@color/pv_sky" />
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_gravity="center" android:text="⚡"
+                android:textSize="17sp" android:textStyle="bold" />
+        </FrameLayout>
+        <LinearLayout
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_marginStart="10dp" android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:text="Add rate limiting" android:textColor="@color/pv_on_run"
+                android:textSize="13sp" android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:text="api · 3m ago" android:textColor="@color/pv_on_run"
+                android:textSize="11sp" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:background="@drawable/pv_chip_run" android:paddingStart="9dp" android:paddingTop="4dp"
+            android:paddingEnd="9dp" android:paddingBottom="4dp" android:text="Running"
+            android:textColor="@color/pv_run" android:textSize="11sp" android:textStyle="bold" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent" android:layout_height="46dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/pv_pill_done" android:gravity="center_vertical"
+        android:orientation="horizontal" android:paddingStart="5dp" android:paddingEnd="10dp">
+        <FrameLayout android:layout_width="36dp" android:layout_height="36dp">
+            <ImageView
+                android:layout_width="match_parent" android:layout_height="match_parent"
+                android:src="@drawable/shape_done" android:tint="@color/pv_emerald" />
+            <ImageView
+                android:layout_width="18dp" android:layout_height="18dp" android:layout_gravity="center"
+                android:src="@drawable/lucide_book_open" android:tint="@color/pv_emerald_glyph" />
+        </FrameLayout>
+        <LinearLayout
+            android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+            android:layout_marginStart="10dp" android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:text="Rewrite README" android:textColor="@color/pv_on_done"
+                android:textSize="13sp" android:textStyle="bold" />
+            <TextView
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:maxLines="1" android:text="docs · 12m ago" android:textColor="@color/pv_on_done"
+                android:textSize="11sp" />
+        </LinearLayout>
+        <TextView
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:background="@drawable/pv_chip_done" android:paddingStart="9dp" android:paddingTop="4dp"
+            android:paddingEnd="9dp" android:paddingBottom="4dp" android:text="Done"
+            android:textColor="@color/pv_done" android:textSize="11sp" android:textStyle="bold" />
+    </LinearLayout>
+</LinearLayout>

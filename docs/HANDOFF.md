@@ -1,6 +1,6 @@
 # T3 Code Android Widget — Handoff Document
 
-**Status:** Scoped, not started
+**Status:** M0 spike done, M1 scaffolded (builds, unit tests pass; not yet verified on a device)
 **Date:** 2026-11-25
 **Source reviewed:** `pingdotgg/t3code` @ `e2c3c425` (Nov 24, 2026). All file references below are relative to that repo.
 
@@ -361,6 +361,21 @@ Rough size: M1 ≈ a few hundred lines of Kotlin; M3 roughly doubles it (most of
 
 ---
 
+## 10a. M0 spike results (2026-11-25, server `0.1.11`, protocol `2`)
+
+Verified against a live desktop-app server on `127.0.0.1:3773`:
+
+- `GET /.well-known/t3/environment` works **without auth**; returns `label`, `serverVersion`, `orchestrationProtocolVersion: 2`, and `capabilities` as an **object** of flags (not a list).
+- `GET /api/orchestration/shell` with a CLI `orchestration:read` token → 200. `omitIdleSubagents`/`omitOlderSettled` accept both `true` and `1` (open question 2 resolved).
+- No token → **401**. Missing or wrong `x-t3-orchestration-protocol` header → **empty-body 400, not 426**. The client disambiguates a 400 by re-probing the environment endpoint.
+- Response `schemaVersion` is now **2** (§5.2 said 1). Extra top-level key `projectIdentities` (string).
+- `latestVisibleMessage` was `null` on every thread in the HTTP snapshot; treat message previews as best-effort.
+- Thread has ~60 keys, incl. `deletedAt`, `blockedOnThreadWait`, `lastErrorClass`, `lastErrorCode` (now also used: `deletedAt` hides a thread).
+- No live `pendingRuntimeRequest` was available to record; those paths are covered by `shell_synthetic.json` only.
+- `t3` CLI lives at `~/.t3/bin/t3` when installed by the desktop app (not on PATH).
+- Sanitized real fixture: `app/src/test/resources/fixtures/shell_real.json` (re-record with `scripts/record-fixture.sh`).
+- WS `dispatchCommand` capture (for M3) **not done yet**.
+
 ## 11. Open questions / unverified items
 
 1. Exact JSON shape of Effect RPC `Chunk` / `Exit` server frames (capture real traffic).
@@ -368,7 +383,7 @@ Rough size: M1 ≈ a few hundred lines of Kotlin; M3 roughly doubles it (most of
 3. Whether `--ttl` can exceed 30 days, and the exact revoke command.
 4. Bind address when `t3 serve` is run without `--lan` / host flags.
 5. Whether client-generated UUIDs are accepted for `commandId` / `messageId`.
-6. Whether `https://app.t3.codes/threads/<id>` opens the right thread for a self-hosted (non-Connect) server in the official Android app.
+6. ~~Whether `https://app.t3.codes/threads/<id>` opens the right thread~~ Resolved: the official app routes `threads/:environmentId/:threadId`; the widget now sends `https://app.t3.codes/threads/<environmentId>/<threadId>` using `environmentId` from `/.well-known/t3/environment`.
 7. Shape of `ProviderUserInputAnswers` (only needed if answering questions from the widget).
 8. Exact semantics of `status: "waiting"` vs. `pendingRuntimeRequest` (validate with fixtures).
 

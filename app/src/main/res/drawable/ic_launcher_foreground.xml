@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Three status pills (needs you / running / done), like the widget -->
+    <path android:fillColor="#FBBF24" android:pathData="M32,28h44a7,7 0,0 1,0 14h-44a7,7 0,0 1,0 -14z" />
+    <path android:fillColor="#7A4E00" android:pathData="M27.8,35a4.2,4.2 0,1 1,8.4,0a4.2,4.2 0,1 1,-8.4,0z" />
+    <path android:fillColor="#7A4E00" android:fillAlpha="0.55" android:pathData="M41.5,33.5h23a1.5,1.5 0,0 1,0 3h-23a1.5,1.5 0,0 1,0 -3z" />
+    <path android:fillColor="#A8B4FF" android:pathData="M32,47h44a7,7 0,0 1,0 14h-44a7,7 0,0 1,0 -14z" />
+    <path android:fillColor="#28337A" android:pathData="M27.8,54a4.2,4.2 0,1 1,8.4,0a4.2,4.2 0,1 1,-8.4,0z" />
+    <path android:fillColor="#28337A" android:fillAlpha="0.55" android:pathData="M41.5,52.5h29a1.5,1.5 0,0 1,0 3h-29a1.5,1.5 0,0 1,0 -3z" />
+    <path android:fillColor="#6FD38B" android:pathData="M32,66h44a7,7 0,0 1,0 14h-44a7,7 0,0 1,0 -14z" />
+    <path android:fillColor="#14532D" android:pathData="M27.8,73a4.2,4.2 0,1 1,8.4,0a4.2,4.2 0,1 1,-8.4,0z" />
+    <path android:fillColor="#14532D" android:fillAlpha="0.55" android:pathData="M41.5,71.5h17a1.5,1.5 0,0 1,0 3h-17a1.5,1.5 0,0 1,0 -3z" />
+</vector>

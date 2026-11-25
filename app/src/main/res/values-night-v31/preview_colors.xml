@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="pv_bg">@android:color/system_neutral1_900</color>
+    <color name="pv_on">@android:color/system_neutral1_100</color>
+    <color name="pv_on_variant">@android:color/system_neutral2_200</color>
+    <color name="pv_fab">@android:color/system_accent1_700</color>
+    <color name="pv_on_fab">@android:color/system_accent1_100</color>
+    <color name="pv_need">#FF5C4100</color>
+    <color name="pv_on_need">#FFFFDDB3</color>
+    <color name="pv_need_accent">#FFFFB95C</color>
+    <color name="pv_run">@android:color/system_accent1_700</color>
+    <color name="pv_on_run">@android:color/system_accent1_100</color>
+    <color name="pv_run_accent">@android:color/system_accent1_200</color>
+    <color name="pv_done">#FF1E4E25</color>
+    <color name="pv_on_done">#FFBAF3B8</color>
+    <color name="pv_done_accent">#FF9ED69E</color>
+    <color name="pv_violet">#FF5B21B6</color>
+    <color name="pv_violet_glyph">#FFDDD6FE</color>
+    <color name="pv_sky">#FF075985</color>
+    <color name="pv_emerald">#FF065F46</color>
+    <color name="pv_emerald_glyph">#FFA7F3D0</color>
+</resources>

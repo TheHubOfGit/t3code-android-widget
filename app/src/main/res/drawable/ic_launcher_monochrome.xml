@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Three status pills (needs you / running / done), like the widget -->
+    <path android:fillColor="#FFFFFF" android:pathData="M32,28h44a7,7 0,0 1,0 14h-44a7,7 0,0 1,0 -14z" />
+    <path android:fillColor="#00000000" android:pathData="M27.8,35a4.2,4.2 0,1 1,8.4,0a4.2,4.2 0,1 1,-8.4,0z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M32,47h44a7,7 0,0 1,0 14h-44a7,7 0,0 1,0 -14z" />
+    <path android:fillColor="#00000000" android:pathData="M27.8,54a4.2,4.2 0,1 1,8.4,0a4.2,4.2 0,1 1,-8.4,0z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M32,66h44a7,7 0,0 1,0 14h-44a7,7 0,0 1,0 -14z" />
+    <path android:fillColor="#00000000" android:pathData="M27.8,73a4.2,4.2 0,1 1,8.4,0a4.2,4.2 0,1 1,-8.4,0z" />
+</vector>

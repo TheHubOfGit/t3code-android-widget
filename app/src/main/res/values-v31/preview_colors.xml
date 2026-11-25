@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Colors for the static widget-picker preview (Android 12-14). Mirrors T3StatusWidget. -->
+<resources>
+    <color name="pv_bg">@android:color/system_neutral1_50</color>
+    <color name="pv_on">@android:color/system_neutral1_900</color>
+    <color name="pv_on_variant">@android:color/system_neutral2_700</color>
+    <color name="pv_fab">@android:color/system_accent1_100</color>
+    <color name="pv_on_fab">@android:color/system_accent1_900</color>
+    <color name="pv_need">#FFFFDDB3</color>
+    <color name="pv_on_need">#FF2A1800</color>
+    <color name="pv_need_accent">#FF825500</color>
+    <color name="pv_run">@android:color/system_accent1_100</color>
+    <color name="pv_on_run">@android:color/system_accent1_900</color>
+    <color name="pv_run_accent">@android:color/system_accent1_600</color>
+    <color name="pv_done">#FFC4EFC0</color>
+    <color name="pv_on_done">#FF002106</color>
+    <color name="pv_done_accent">#FF2E6A30</color>
+    <color name="pv_violet">#FFDDD6FE</color>
+    <color name="pv_violet_glyph">#FF4C1D95</color>
+    <color name="pv_sky">#FFBAE6FD</color>
+    <color name="pv_emerald">#FFA7F3D0</color>
+    <color name="pv_emerald_glyph">#FF064E3B</color>
+</resources>
