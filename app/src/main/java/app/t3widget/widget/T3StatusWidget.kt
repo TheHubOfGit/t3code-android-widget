@@ -1,6 +1,7 @@
 package app.t3widget.widget
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.content.Intent
 import android.text.format.DateFormat
 import androidx.compose.runtime.Composable
@@ -48,6 +49,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import app.t3widget.R
 import app.t3widget.data.Classifier
+import app.t3widget.data.FaviconStore
 import app.t3widget.data.ProjectIcon
 import app.t3widget.data.SettingsStore
 import app.t3widget.data.ShellRepository
@@ -56,7 +58,10 @@ import app.t3widget.data.ThreadRow
 import app.t3widget.data.ThreadState
 import app.t3widget.data.WidgetSnapshot
 import app.t3widget.data.WidgetStyle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import app.t3widget.settings.SettingsActivity
 import app.t3widget.sync.ShellSyncWorker
 import java.time.Duration
@@ -73,14 +78,19 @@ class T3StatusWidget : GlanceAppWidget() {
         val repo = ShellRepository(context)
         val settings = SettingsStore(context)
         val serverUrl = settings.loadUrl()
-        val initial = repo.current()
+        val favicons = FaviconStore(context)
+        fun withFavicons(s: WidgetSnapshot) = s to s.rows.mapNotNull { row ->
+            row.workspaceRoot?.takeIf { row.icon?.kind == "auto" }?.let { root -> favicons.loadBitmap(root)?.let { root to it } }
+        }.toMap()
+        val initial = withFavicons(repo.current())
+        val content = repo.snapshot.map { withFavicons(it) }.flowOn(Dispatchers.IO)
         val styleFlow = settings.widgetStyle(GlanceAppWidgetManager(context).getAppWidgetId(id))
         val initialStyle = styleFlow.first()
         provideContent {
-            val snapshot by repo.snapshot.collectAsState(initial = initial)
+            val state by content.collectAsState(initial = initial)
             val style by styleFlow.collectAsState(initial = initialStyle)
             GlanceTheme {
-                WidgetContent(snapshot, serverUrl, style)
+                WidgetContent(state.first, serverUrl, style, state.second)
             }
         }
     }
@@ -181,7 +191,12 @@ private val PILL_HEIGHT = 46.dp
 private val PILL_GAP = 6.dp
 
 @Composable
-internal fun WidgetContent(snapshot: WidgetSnapshot, serverUrl: String?, style: WidgetStyle) {
+internal fun WidgetContent(
+    snapshot: WidgetSnapshot,
+    serverUrl: String?,
+    style: WidgetStyle,
+    favicons: Map<String, Bitmap> = emptyMap(),
+) {
     val transparent = style == WidgetStyle.TRANSPARENT
     val size = LocalSize.current
     val chrome = if (transparent) 0.dp else HEADER_HEIGHT + 24.dp
@@ -221,7 +236,7 @@ internal fun WidgetContent(snapshot: WidgetSnapshot, serverUrl: String?, style: 
         }
         rows.forEachIndexed { i, row ->
             if (i > 0) Spacer(GlanceModifier.height(PILL_GAP))
-            Pill(row, snapshot.environmentId, serverUrl)
+            Pill(row, snapshot.environmentId, serverUrl, row.workspaceRoot?.let { favicons[it] })
         }
     }
 }
@@ -309,7 +324,7 @@ private fun StatusBanner(text: String, status: SyncStatus, asPill: Boolean) {
 }
 
 @Composable
-private fun Pill(row: ThreadRow, environmentId: String?, serverUrl: String?) {
+private fun Pill(row: ThreadRow, environmentId: String?, serverUrl: String?, favicon: Bitmap?) {
     val context = LocalContext.current
     val style = styleOf(row)
     val sub = listOfNotNull(
@@ -327,7 +342,7 @@ private fun Pill(row: ThreadRow, environmentId: String?, serverUrl: String?) {
             .clickable(actionStartActivity(ThreadLinks.threadIntent(context, environmentId, row.threadId, serverUrl))),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        ProjectBadge(row, style)
+        ProjectBadge(row, style, favicon)
         Spacer(GlanceModifier.width(10.dp))
         Column(modifier = GlanceModifier.defaultWeight()) {
             Text(
@@ -361,18 +376,25 @@ private fun Pill(row: ThreadRow, environmentId: String?, serverUrl: String?) {
 
 /** Project icon inside the state's expressive shape, filled with the project's color. */
 @Composable
-private fun ProjectBadge(row: ThreadRow, style: StateStyle) {
-    val icon = row.icon ?: ProjectIcon("monogram", Classifier.monogram(row.projectTitle), "gray", "?")
+private fun ProjectBadge(row: ThreadRow, style: StateStyle, favicon: Bitmap?) {
+    val icon = row.icon ?: ProjectIcon("auto", Classifier.monogram(row.projectTitle), Classifier.monogramColor(row.projectTitle), "PR")
     val glyphColor = ProjectColors.glyph(icon.color)
+    val showFavicon = favicon != null && icon.kind == "auto"
     Box(modifier = GlanceModifier.size(36.dp), contentAlignment = Alignment.Center) {
         Image(
             provider = ImageProvider(style.shape),
             contentDescription = style.label,
-            colorFilter = ColorFilter.tint(ProjectColors.container(icon.color)),
+            // A favicon sits on the theme surface, as in T3 Code; glyphs get the project color.
+            colorFilter = ColorFilter.tint(if (showFavicon) GlanceTheme.colors.surface else ProjectColors.container(icon.color)),
             modifier = GlanceModifier.size(36.dp),
         )
         val lucide = if (icon.kind == "lucide") LucideIcons.byName[icon.value] else null
         when {
+            showFavicon -> Image(
+                provider = ImageProvider(favicon!!),
+                contentDescription = null,
+                modifier = GlanceModifier.size(20.dp),
+            )
             lucide != null -> Image(
                 provider = ImageProvider(lucide),
                 contentDescription = null,
@@ -385,7 +407,7 @@ private fun ProjectBadge(row: ThreadRow, style: StateStyle) {
                 maxLines = 1,
             )
             else -> {
-                val text = if (icon.kind == "monogram") icon.value else icon.fallbackMonogram
+                val text = if (icon.kind == "lucide") icon.fallbackMonogram else icon.value
                 Text(
                     text = text,
                     style = TextStyle(

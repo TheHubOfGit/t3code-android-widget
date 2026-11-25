@@ -37,7 +37,8 @@ On an emulator, the host's server is at `http://10.0.2.2:3773`.
 |---|---|
 | `app/src/main/java/app/t3widget/data/T3Constants.kt` | Every path/header/version coupled to T3 Code |
 | `data/T3Models.kt`, `T3Api.kt` | Lenient DTOs + OkHttp client, URL/cleartext policy |
-| `data/Classifier.kt` | Pure needs-you / failed / running / waiting / done logic |
+| `data/Classifier.kt` | Pure needs-you / failed / running / waiting / done logic; project icon, monogram and color ported from T3 Code |
+| `data/FaviconStore.kt` | Repo favicons for projects without a custom icon: signs URLs via the WebSocket RPC `assets.createUrl` (read scope is enough), rasterizes SVG/PNG/ICO, caches 6 h |
 | `data/ShellRepository.kt`, `SettingsStore.kt` | Cached snapshot (DataStore), Keystore-encrypted token |
 | `sync/ShellSyncWorker.kt` | 15-min periodic + on-demand refresh |
 | `widget/` | Glance widget, refresh action, tap-through |

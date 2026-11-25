@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.glance.material3)
     implementation(libs.work.runtime)
     implementation(libs.okhttp)
+    implementation(libs.androidsvg)
     implementation(libs.serialization.json)
     implementation(libs.datastore.preferences)
 

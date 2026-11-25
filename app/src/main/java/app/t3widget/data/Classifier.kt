@@ -1,7 +1,9 @@
 package app.t3widget.data
 
 import kotlinx.serialization.Serializable
+import java.text.Normalizer
 import java.time.Instant
+import java.util.Locale
 
 /** Widget-facing state, ordered by how urgently it needs the user. */
 @Serializable
@@ -10,7 +12,10 @@ enum class ThreadState { NEEDS_YOU, FAILED, RUNNING, WAITING, DONE }
 /** What to draw inside a row's state shape. */
 @Serializable
 data class ProjectIcon(
-    /** "monogram", "emoji" or "lucide". */
+    /**
+     * "monogram", "emoji" or "lucide" when the project sets an icon; "auto" when it doesn't, in
+     * which case T3 shows the repo favicon if the server finds one, else the monogram in [value].
+     */
     val kind: String,
     /** Monogram text, the emoji, or the Lucide icon name. */
     val value: String,
@@ -34,6 +39,8 @@ data class ThreadRow(
     val detail: String? = null,
     val updatedAt: String? = null,
     val icon: ProjectIcon? = null,
+    /** Project folder on the server; the key for its favicon. */
+    val workspaceRoot: String? = null,
 )
 
 @Serializable
@@ -48,8 +55,9 @@ object Classifier {
     const val MAX_ROWS = 3
 
     /** T3 Code's project icon palette; used to pick a stable color for projects without one. */
+    /** Same order as T3 Code's `ProjectIconColor` literals; the auto color indexes into it. */
     val ICON_COLORS = listOf(
-        "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan",
+        "gray", "red", "orange", "amber", "yellow", "lime", "green", "emerald", "teal", "cyan",
         "sky", "blue", "indigo", "violet", "purple", "fuchsia", "pink", "rose",
     )
 
@@ -122,33 +130,52 @@ object Classifier {
             detail = detail?.take(160),
             updatedAt = t.updatedAt,
             icon = projectIcon(project, t.projectId, projectTitle),
+            workspaceRoot = project?.workspaceRoot?.takeIf { it.isNotBlank() },
         )
     }
 
+    /** Mirrors T3 Code's `resolveProjectIconGlyph` / `projectAutoMonogram` (apps/mobile/src/lib/projectIcon.ts). */
+    @Suppress("UNUSED_PARAMETER")
     fun projectIcon(project: ProjectDto?, projectId: String?, projectTitle: String): ProjectIcon {
         val icon = project?.projectIcon
-        val color = icon?.color?.takeIf { it.isNotBlank() } ?: colorFor(projectId ?: projectTitle)
         val mono = monogram(projectTitle)
+        val color = icon?.color?.takeIf { it in ICON_COLORS } ?: monogramColor(projectTitle)
         return when {
             icon?.kind == "emoji" && !icon.emoji.isNullOrBlank() -> ProjectIcon("emoji", icon.emoji, color, mono)
             icon?.kind == "lucide" && !icon.name.isNullOrBlank() -> ProjectIcon("lucide", icon.name, color, mono)
-            icon?.kind == "monogram" && !icon.text.isNullOrBlank() -> ProjectIcon("monogram", icon.text.take(3), color, mono)
-            else -> ProjectIcon("monogram", mono, color, mono)
+            icon?.kind == "monogram" && !icon.text.isNullOrBlank() -> ProjectIcon("monogram", icon.text, color, mono)
+            // No icon, or a kind this build doesn't know: favicon, else the auto monogram.
+            else -> ProjectIcon("auto", mono, monogramColor(projectTitle), mono)
         }
     }
 
-    /** "my-app" → "MA", "docs" → "DO", "" → "?". */
+    /** Port of T3 Code's `projectMonogram` (packages/shared/src/projectMonogram.ts). */
     fun monogram(title: String): String {
-        val words = title.split(Regex("[\\s_\\-./]+")).filter { it.isNotEmpty() }
-        val letters = when {
-            words.isEmpty() -> "?"
-            words.size == 1 -> words[0].take(2)
-            else -> "${words[0].first()}${words[1].first()}"
-        }
-        return letters.uppercase()
+        val words = Regex("[\\p{L}\\p{N}]+").findAll(Normalizer.normalize(title, Normalizer.Form.NFKC).trim())
+            .map { it.value }.toList()
+        val firstWord = words.firstOrNull() ?: return "PR"
+        val glyphs = firstWord.codePoints().toArray().map { String(Character.toChars(it)) }
+        val first = glyphs.first()
+        if (isSingleGlyphScript(first.codePointAt(0))) return first
+        val second = glyphs.drop(1).firstOrNull { Character.isDigit(it.codePointAt(0)) }
+            ?: (if (words.size > 1) words.last().let { String(Character.toChars(it.codePointAt(0))) } else glyphs.last())
+        val combined = (first + second).uppercase(Locale.ROOT)
+        return combined.codePoints().limit(2).toArray().joinToString("") { String(Character.toChars(it)) }
     }
 
-    fun colorFor(key: String): String = ICON_COLORS[Math.floorMod(key.hashCode(), ICON_COLORS.size)]
+    /** Port of T3 Code's `projectMonogramColor`: a stable color from the title. */
+    fun monogramColor(title: String): String {
+        val seed = Normalizer.normalize(title, Normalizer.Form.NFKC).trim().lowercase(Locale.US).ifEmpty { "project" }
+        var index = 0
+        seed.codePoints().forEach { cp -> index = (index * 31 + cp) % ICON_COLORS.size }
+        return ICON_COLORS[index]
+    }
+
+    private fun isSingleGlyphScript(cp: Int): Boolean = when (Character.UnicodeScript.of(cp)) {
+        Character.UnicodeScript.HAN, Character.UnicodeScript.HIRAGANA,
+        Character.UnicodeScript.KATAKANA, Character.UnicodeScript.HANGUL -> true
+        else -> false
+    }
 
     fun humanKind(kind: String?): String = when (kind) {
         "command" -> "command approval"

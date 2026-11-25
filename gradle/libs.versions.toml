@@ -7,6 +7,7 @@ composeBom = "2025.08.00"
 glance = "1.2.0"
 work = "2.10.1"
 okhttp = "4.12.0"
+androidsvg = "1.4"
 serialization = "1.7.3"
 datastore = "1.1.7"
 junit = "4.13.2"
@@ -22,6 +23,7 @@ glance-material3 = { module = "androidx.glance:glance-material3", version.ref = 
 work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
+androidsvg = { module = "com.caverock:androidsvg-aar", version.ref = "androidsvg" }
 serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 junit = { module = "junit:junit", version.ref = "junit" }

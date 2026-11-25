@@ -97,7 +97,7 @@ class ClassifierTest {
             Classifier.projectIcon(snapshot.projects.first { it.id == projectId }, projectId, title)
         val emoji = icon("p3", "Emoji Proj")
         assertEquals("emoji" to "⚡", emoji.kind to emoji.value)
-        assertTrue(emoji.color in Classifier.ICON_COLORS) // no color given → derived
+        assertEquals("blue", emoji.color) // no color given → T3's title-derived color
 
         val lucide = icon("p4", "Lucide Proj")
         assertEquals(Triple("lucide", "rocket", "sky"), Triple(lucide.kind, lucide.value, lucide.color))
@@ -106,20 +106,35 @@ class ClassifierTest {
         val mono = icon("p5", "Mono Proj")
         assertEquals(Triple("monogram", "XY", "rose"), Triple(mono.kind, mono.value, mono.color))
 
+        // Unknown kinds fall through to favicon / auto monogram, as in T3 Code.
         val unknown = icon("p6", "Future Proj")
-        assertEquals(Triple("monogram", "FP", "teal"), Triple(unknown.kind, unknown.value, unknown.color))
+        assertEquals(Triple("auto", "FP", "orange"), Triple(unknown.kind, unknown.value, unknown.color))
 
-        // No icon set: automatic monogram with a stable color.
-        val auto = row("t-run")!!.icon!!
-        assertEquals("monogram" to "MA", auto.kind to auto.value)
-        assertEquals(auto.color, Classifier.build(snapshot, now, limit = 100).rows.first { it.threadId == "t-run" }.icon!!.color)
+        // No icon set: favicon if the server has one, else T3's auto monogram and color.
+        val run = row("t-run")!!
+        assertEquals(Triple("auto", "MA", "orange"), Triple(run.icon!!.kind, run.icon!!.value, run.icon!!.color))
+        assertEquals("/src/my-app", run.workspaceRoot)
     }
 
-    @Test fun `monograms`() {
-        assertEquals("MA", Classifier.monogram("my-app"))
-        assertEquals("DO", Classifier.monogram("docs"))
-        assertEquals("TA", Classifier.monogram("t3code android_widget"))
-        assertEquals("?", Classifier.monogram(""))
+    /** Expected values come from running T3 Code's own projectMonogram / projectMonogramColor. */
+    @Test fun `monograms and colors match T3 Code`() {
+        val expected = listOf(
+            Triple("my-app", "MA", "orange"),
+            Triple("docs", "DS", "blue"),
+            Triple("t3code android_widget", "T3", "pink"),
+            Triple("", "PR", "fuchsia"),
+            Triple("Visual Git", "VG", "purple"),
+            Triple("Pixel Watch Mod", "PM", "emerald"),
+            Triple("Codex Account Switcher", "CS", "amber"),
+            Triple("~", "PR", "gray"),
+            Triple("東京 app", "東", "green"),
+            Triple("Proj 2go", "P2", "violet"),
+            Triple("a", "AA", "emerald"),
+        )
+        for ((title, mono, color) in expected) {
+            assertEquals("monogram of '$title'", mono, Classifier.monogram(title))
+            assertEquals("color of '$title'", color, Classifier.monogramColor(title))
+        }
     }
 
     @Test fun `real recorded snapshot parses and yields three rows`() {

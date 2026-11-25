@@ -58,6 +58,9 @@ class ShellRepository(
                 val built = Classifier.build(result.value)
                 // Unauthenticated and tiny; fall back to the cached id if the probe fails.
                 val envId = (api.fetchEnvironment(config.baseUrl) as? ApiResult.Ok)?.value?.environmentId
+                // Projects without a custom icon show their repo favicon, as in T3 Code.
+                val faviconRoots = built.rows.filter { it.icon?.kind == "auto" }.mapNotNull { it.workspaceRoot }
+                runCatching { FaviconStore(context).refresh(config, faviconRoots) }
                 update { prev ->
                     WidgetSnapshot(
                         status = SyncStatus.OK,

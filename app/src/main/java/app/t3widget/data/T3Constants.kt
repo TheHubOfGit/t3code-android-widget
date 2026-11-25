@@ -11,6 +11,16 @@ object T3Constants {
     const val ENVIRONMENT_PATH = "/.well-known/t3/environment"
     const val SHELL_PATH = "/api/orchestration/shell"
 
+    /** Mints a 5-minute WebSocket ticket; works with an orchestration:read token. */
+    const val WS_TICKET_PATH = "/api/auth/websocket-ticket/rpc"
+    const val WS_PATH = "/ws"
+
+    /** Effect RPC method that signs an asset URL; `project-favicon` needs only orchestration:read. */
+    const val RPC_ASSETS_CREATE_URL = "assets.createUrl"
+
+    /** Suffix of the URL the server returns when a project has no favicon. */
+    const val FAVICON_MISSING_SUFFIX = "/project-favicon-missing"
+
     /** Never add `resumeFrom`: the server may then answer `{"resumable": true}` instead of a snapshot. */
     val SHELL_QUERY = mapOf(
         "omitIdleSubagents" to "true",
